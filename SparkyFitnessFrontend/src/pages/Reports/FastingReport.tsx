@@ -34,7 +34,12 @@ import {
 } from 'date-fns';
 import ZoomableChart from '@/components/ZoomableChart';
 import { List, Clock, Hourglass, Award } from 'lucide-react';
-import { calculateSmartYAxisDomain, getChartConfig } from '@/utils/chartUtils';
+import {
+  calculateSmartYAxisDomain,
+  getChartConfig,
+  prepareTimeChartData,
+  getTimeXAxisProps,
+} from '@/utils/chartUtils';
 import { FastingLog } from '@/types/fasting';
 
 interface FastingReportProps {
@@ -51,7 +56,7 @@ const COLORS = ['#6366f1', '#06b6d4', '#f59e0b', '#ef4444'];
 
 export const FastingReport = ({ fastingData }: FastingReportProps) => {
   const { t } = useTranslation();
-  const { formatDateInUserTimezone } = usePreferences();
+  const { formatDateInUserTimezone, chartScaleMode } = usePreferences();
   const [isMounted, setIsMounted] = useState(false);
 
   React.useEffect(() => {
@@ -101,10 +106,11 @@ export const FastingReport = ({ fastingData }: FastingReportProps) => {
       const mins = f.duration_minutes ?? 0;
       map[date] = (map[date] || 0) + mins / 60; // hours
     });
-    return Object.entries(map).map(([date, hours]) => ({
+    const mapped = Object.entries(map).map(([date, hours]) => ({
       date,
       hours: Number(hours.toFixed(2)),
     }));
+    return prepareTimeChartData(mapped, 'date');
   }, [fastingData, formatDateInUserTimezone]);
 
   // Chart domain calculation consistent with Charts tab
@@ -164,11 +170,12 @@ export const FastingReport = ({ fastingData }: FastingReportProps) => {
       .slice()
       .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
     const window = 3;
-    return sorted.map((d, i) => {
+    const mapped = sorted.map((d, i) => {
       const slice = sorted.slice(Math.max(0, i - window + 1), i + 1);
       const avg = slice.reduce((s, cur) => s + cur.hours, 0) / slice.length;
       return { date: d.date, avg: Number(avg.toFixed(2)) };
     });
+    return prepareTimeChartData(mapped, 'date');
   }, [dailyData]);
 
   // compute max values for domain calculations
@@ -258,7 +265,20 @@ export const FastingReport = ({ fastingData }: FastingReportProps) => {
                       debounce={100}
                     >
                       <BarChart data={dailyData}>
-                        <XAxis dataKey="date" />
+                        <XAxis
+                          {...getTimeXAxisProps({
+                            chartScaleMode,
+                            dateKey: 'date',
+                            timestampKey: 'timestamp',
+                            tickFormatter: (tick) =>
+                              formatDateInUserTimezone(
+                                typeof tick === 'number'
+                                  ? new Date(tick)
+                                  : parseISO(tick),
+                                'MMM dd'
+                              ),
+                          })}
+                        />
                         <YAxis
                           domain={dailyDomain}
                           label={{
@@ -480,8 +500,21 @@ export const FastingReport = ({ fastingData }: FastingReportProps) => {
                       debounce={100}
                     >
                       <LineChart data={trendData}>
+                        <XAxis
+                          {...getTimeXAxisProps({
+                            chartScaleMode,
+                            dateKey: 'date',
+                            timestampKey: 'timestamp',
+                            tickFormatter: (tick) =>
+                              formatDateInUserTimezone(
+                                typeof tick === 'number'
+                                  ? new Date(tick)
+                                  : parseISO(tick),
+                                'MMM dd'
+                              ),
+                          })}
+                        />
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
                         <YAxis
                           domain={trendDomain}
                           label={{

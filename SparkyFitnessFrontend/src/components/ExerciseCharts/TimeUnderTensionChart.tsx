@@ -11,6 +11,8 @@ import {
   Legend,
 } from 'recharts';
 import ZoomableChart from '@/components/ZoomableChart';
+import { usePreferences } from '@/contexts/PreferencesContext';
+import { prepareTimeChartData, getTimeXAxisProps } from '@/utils/chartUtils';
 
 interface TimeUnderTensionChartProps {
   data: { date: string; timeUnderTension: number }[];
@@ -22,6 +24,9 @@ export const TimeUnderTensionChart = ({
   exerciseName,
 }: TimeUnderTensionChartProps) => {
   const { t } = useTranslation();
+  const { chartScaleMode, formatDateInUserTimezone } = usePreferences();
+
+  const preparedData = prepareTimeChartData(data, 'date');
 
   return (
     <Card>
@@ -50,11 +55,21 @@ export const TimeUnderTensionChart = ({
               debounce={100}
             >
               <BarChart
-                data={data}
+                data={preparedData}
                 margin={{ top: 20, right: 30, bottom: 20, left: 20 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
+                <XAxis
+                  {...getTimeXAxisProps({
+                    chartScaleMode,
+                    dateKey: 'date',
+                    timestampKey: 'timestamp',
+                    tickFormatter: (d) =>
+                      typeof d === 'number'
+                        ? formatDateInUserTimezone(new Date(d), 'MMM dd')
+                        : String(d),
+                  })}
+                />
                 <YAxis
                   label={{
                     value: t(

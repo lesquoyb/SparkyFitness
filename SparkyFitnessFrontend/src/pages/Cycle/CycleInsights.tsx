@@ -29,6 +29,8 @@ import {
 } from 'lucide-react';
 import { HORMONE_CURVES, type SharedCycle } from '@workspace/shared';
 import CorrelationCards from './CorrelationCards';
+import { usePreferences } from '@/contexts/PreferencesContext';
+import { prepareTimeChartData, getTimeXAxisProps } from '@/utils/chartUtils';
 
 interface CycleInsightsResult {
   stats: {
@@ -73,6 +75,7 @@ interface CycleInsightsResult {
 
 export default function CycleInsights() {
   const { t } = useTranslation();
+  const { chartScaleMode, formatDateInUserTimezone } = usePreferences();
   const { data: insights, isLoading } = useCycleInsights();
   const { data: settings } = useCycleSettings();
 
@@ -103,6 +106,10 @@ export default function CycleInsights() {
     bbtSeries,
     cycles = [],
   } = typedInsights;
+
+  const preparedBbtSeries = useMemo(() => {
+    return prepareTimeChartData(bbtSeries || [], 'date');
+  }, [bbtSeries]);
 
   const completedCyclesCount = cycles.filter((c) => c.cycle_length).length;
   const avgCycleLength =
@@ -251,13 +258,20 @@ export default function CycleInsights() {
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={bbtSeries}
+                    data={preparedBbtSeries}
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis
-                      dataKey="date"
-                      tickFormatter={(str) => str.slice(5)}
+                      {...getTimeXAxisProps({
+                        chartScaleMode,
+                        dateKey: 'date',
+                        timestampKey: 'timestamp',
+                        tickFormatter: (str) =>
+                          typeof str === 'number'
+                            ? formatDateInUserTimezone(new Date(str), 'MMM dd')
+                            : String(str).slice(5),
+                      })}
                       tick={{ fontSize: 9 }}
                     />
                     <YAxis

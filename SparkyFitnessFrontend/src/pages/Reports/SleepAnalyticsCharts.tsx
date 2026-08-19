@@ -47,6 +47,7 @@ import SleepStageChart from './SleepStageChart';
 import SleepSummaryCard from './SleepSummaryCard';
 import SpO2Card from './SpO2Card';
 import { useSleepDebtQuery } from '@/hooks/SleepScience/useSleepScience';
+import { prepareTimeChartData, getTimeXAxisProps } from '@/utils/chartUtils';
 
 interface SpO2DataPoint {
   date: string;
@@ -91,7 +92,8 @@ const SleepAnalyticsCharts = ({
   heartRateData,
   latestSleepEntry,
 }: SleepAnalyticsChartsProps) => {
-  const { formatDateInUserTimezone, dateFormat, timezone } = usePreferences();
+  const { formatDateInUserTimezone, dateFormat, timezone, chartScaleMode } =
+    usePreferences();
   const { resolvedTheme } = useTheme();
   const { t } = useTranslation();
   const { data: sleepDebtData } = useSleepDebtQuery();
@@ -114,7 +116,7 @@ const SleepAnalyticsCharts = ({
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
-  const chartData = sleepAnalyticsData
+  const rawChartData = sleepAnalyticsData
     .map((data) => {
       const totalMinutes =
         (data.stagePercentages.deep || 0) +
@@ -164,10 +166,12 @@ const SleepAnalyticsCharts = ({
         wakeTime: wakeTimeHours,
       };
     })
-    .sort((a, b) => {
-      // Safe sorting for date strings
-      return a.date.localeCompare(b.date);
-    });
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const chartData = useMemo(
+    () => prepareTimeChartData(rawChartData, 'date'),
+    [rawChartData]
+  );
 
   interface CustomTooltipProps {
     active?: boolean;
@@ -195,7 +199,10 @@ const SleepAnalyticsCharts = ({
           }}
         >
           <p className="font-semibold mb-2">
-            {formatDateInUserTimezone(label || '', dateFormat)}
+            {formatDateInUserTimezone(
+              typeof label === 'number' ? new Date(label) : label || '',
+              dateFormat
+            )}
           </p>
           <div className="space-y-1">
             {payload.map((entry, index: number) => {
@@ -373,10 +380,18 @@ const SleepAnalyticsCharts = ({
                           stroke={gridColor}
                         />
                         <XAxis
-                          dataKey="date"
-                          tickFormatter={(tick) =>
-                            formatDateInUserTimezone(tick, dateFormat)
-                          }
+                          {...getTimeXAxisProps({
+                            chartScaleMode,
+                            dateKey: 'date',
+                            timestampKey: 'timestamp',
+                            tickFormatter: (tick) =>
+                              formatDateInUserTimezone(
+                                typeof tick === 'number'
+                                  ? new Date(tick)
+                                  : tick,
+                                dateFormat
+                              ),
+                          })}
                           stroke={tickColor}
                           tick={{ fill: tickColor }}
                         />
@@ -458,10 +473,18 @@ const SleepAnalyticsCharts = ({
                           stroke={gridColor}
                         />
                         <XAxis
-                          dataKey="date"
-                          tickFormatter={(tick) =>
-                            formatDateInUserTimezone(tick, dateFormat)
-                          }
+                          {...getTimeXAxisProps({
+                            chartScaleMode,
+                            dateKey: 'date',
+                            timestampKey: 'timestamp',
+                            tickFormatter: (tick) =>
+                              formatDateInUserTimezone(
+                                typeof tick === 'number'
+                                  ? new Date(tick)
+                                  : tick,
+                                dateFormat
+                              ),
+                          })}
                           stroke={tickColor}
                           tick={{ fill: tickColor }}
                         />
@@ -483,7 +506,12 @@ const SleepAnalyticsCharts = ({
                         />
                         <Tooltip
                           labelFormatter={(label) =>
-                            formatDateInUserTimezone(label, dateFormat)
+                            formatDateInUserTimezone(
+                              typeof label === 'number'
+                                ? new Date(label)
+                                : label,
+                              dateFormat
+                            )
                           }
                           formatter={(
                             value:
@@ -563,10 +591,18 @@ const SleepAnalyticsCharts = ({
                           stroke={gridColor}
                         />
                         <XAxis
-                          dataKey="date"
-                          tickFormatter={(tick) =>
-                            formatDateInUserTimezone(tick, dateFormat)
-                          }
+                          {...getTimeXAxisProps({
+                            chartScaleMode,
+                            dateKey: 'date',
+                            timestampKey: 'timestamp',
+                            tickFormatter: (tick) =>
+                              formatDateInUserTimezone(
+                                typeof tick === 'number'
+                                  ? new Date(tick)
+                                  : tick,
+                                dateFormat
+                              ),
+                          })}
                           stroke={tickColor}
                           tick={{ fill: tickColor }}
                         />
@@ -598,7 +634,12 @@ const SleepAnalyticsCharts = ({
                         />
                         <Tooltip
                           labelFormatter={(label) =>
-                            formatDateInUserTimezone(label, dateFormat)
+                            formatDateInUserTimezone(
+                              typeof label === 'number'
+                                ? new Date(label)
+                                : label,
+                              dateFormat
+                            )
                           }
                           formatter={(
                             value:
@@ -683,10 +724,18 @@ const SleepAnalyticsCharts = ({
                           stroke={gridColor}
                         />
                         <XAxis
-                          dataKey="date"
-                          tickFormatter={(tick) =>
-                            formatDateInUserTimezone(tick, dateFormat)
-                          }
+                          {...getTimeXAxisProps({
+                            chartScaleMode,
+                            dateKey: 'date',
+                            timestampKey: 'timestamp',
+                            tickFormatter: (tick) =>
+                              formatDateInUserTimezone(
+                                typeof tick === 'number'
+                                  ? new Date(tick)
+                                  : tick,
+                                dateFormat
+                              ),
+                          })}
                           stroke={tickColor}
                           tick={{ fill: tickColor }}
                         />
@@ -698,7 +747,12 @@ const SleepAnalyticsCharts = ({
                         />
                         <Tooltip
                           labelFormatter={(label) =>
-                            formatDateInUserTimezone(label, dateFormat)
+                            formatDateInUserTimezone(
+                              typeof label === 'number'
+                                ? new Date(label)
+                                : label,
+                              dateFormat
+                            )
                           }
                           formatter={(
                             value:

@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { formatWeight } from '@/utils/numberFormatting';
+import { prepareTimeChartData, getTimeXAxisProps } from '@/utils/chartUtils';
 
 interface PrData {
   date: string;
@@ -27,12 +28,13 @@ interface PrProgressionChartProps {
 export const PrProgressionChart = ({
   prProgressionData,
 }: PrProgressionChartProps) => {
-  const { weightUnit, formatDate } = usePreferences();
+  const { weightUnit, formatDate, chartScaleMode } = usePreferences();
 
   const sortedData = useMemo(() => {
-    return [...prProgressionData].sort(
+    const sorted = [...prProgressionData].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
+    return prepareTimeChartData(sorted, 'date');
   }, [prProgressionData]);
 
   if (prProgressionData.length === 0) {
@@ -56,15 +58,26 @@ export const PrProgressionChart = ({
             <LineChart data={sortedData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
-                dataKey="date"
-                tickFormatter={(date) => formatDate(date)}
+                {...getTimeXAxisProps({
+                  chartScaleMode,
+                  dateKey: 'date',
+                  timestampKey: 'timestamp',
+                  tickFormatter: (date) =>
+                    formatDate(
+                      typeof date === 'number' ? new Date(date) : date
+                    ),
+                })}
                 minTickGap={30}
               />
               <YAxis
                 tickFormatter={(value) => formatWeight(value, weightUnit)}
               />
               <Tooltip
-                labelFormatter={(label) => formatDate(label)}
+                labelFormatter={(label) =>
+                  formatDate(
+                    typeof label === 'number' ? new Date(label) : label
+                  )
+                }
                 formatter={(
                   value:
                     | string

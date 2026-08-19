@@ -182,3 +182,78 @@ export function getChartConfig(dataKey: string) {
     minRangeThreshold: 0.3,
   };
 }
+
+/**
+ * Prepares chart data for time-based scaling by attaching a numeric `timestamp`
+ * property (in milliseconds) and sorting entries chronologically.
+ */
+export function prepareTimeChartData<T extends ChartDataPoint>(
+  data: T[],
+  dateKey: keyof T | string = 'date'
+): (T & { timestamp: number })[] {
+  if (!data || data.length === 0) return [];
+
+  const prepared = data
+    .map((item) => {
+      const rawDate = item[dateKey as keyof T];
+      let timestamp = 0;
+      if (typeof rawDate === 'number') {
+        timestamp = rawDate;
+      } else if (typeof rawDate === 'string' && rawDate) {
+        // Standard ISO or YYYY-MM-DD string parsing
+        const parsed = new Date(
+          rawDate.includes('T') ? rawDate : `${rawDate}T00:00:00`
+        );
+        timestamp = isNaN(parsed.getTime())
+          ? new Date(rawDate).getTime()
+          : parsed.getTime();
+      } else if (rawDate instanceof Date) {
+        timestamp = rawDate.getTime();
+      }
+
+      return {
+        ...item,
+        timestamp: isNaN(timestamp) ? 0 : timestamp,
+      };
+    })
+    .filter((item) => item.timestamp > 0);
+
+  return prepared.sort((a, b) => a.timestamp - b.timestamp);
+}
+
+export interface TimeXAxisPropsOptions {
+  chartScaleMode: 'time' | 'point';
+  dateKey?: string;
+  timestampKey?: string;
+  tickFormatter?: (val: any) => string;
+}
+
+/**
+ * Generates XAxis props depending on whether chartScaleMode is 'time' or 'point'.
+ */
+export function getTimeXAxisProps(options: TimeXAxisPropsOptions) {
+  const {
+    chartScaleMode,
+    dateKey = 'date',
+    timestampKey = 'timestamp',
+    tickFormatter,
+  } = options;
+
+  if (chartScaleMode === 'time') {
+    return {
+      type: 'number' as const,
+      dataKey: timestampKey,
+      domain: ['dataMin', 'dataMax'] as [string, string],
+      scale: 'time' as const,
+      tickFormatter,
+    };
+  }
+
+  return {
+    type: 'category' as const,
+    dataKey: dateKey,
+    domain: undefined,
+    scale: undefined,
+    tickFormatter,
+  };
+}

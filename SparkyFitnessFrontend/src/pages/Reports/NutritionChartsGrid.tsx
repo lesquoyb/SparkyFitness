@@ -19,6 +19,8 @@ import {
   calculateSmartYAxisDomain,
   excludeIncompleteDay,
   getChartConfig,
+  prepareTimeChartData,
+  getTimeXAxisProps,
 } from '@/utils/chartUtils';
 import type { UserCustomNutrient } from '@/types/customNutrient';
 import { CENTRAL_NUTRIENT_CONFIG } from '@/constants/nutrients';
@@ -49,6 +51,7 @@ const NutritionChartsGrid = ({
     energyUnit,
     convertEnergy,
     showNetCarbs,
+    chartScaleMode,
   } = usePreferences(); // Destructure formatDateInUserTimezone, energyUnit, convertEnergy
   const effectiveNutritionData = useMemo(
     () => withNetCarbsSubstitution(nutritionData, showNetCarbs),
@@ -62,8 +65,12 @@ const NutritionChartsGrid = ({
 
   info(loggingLevel, 'NutritionChartsGrid: Rendering component.');
 
-  const formatDateForChart = (dateStr: string) => {
-    return formatDateInUserTimezone(parseISO(dateStr), 'MMM dd');
+  const formatDateForChart = (dateValue: string | number) => {
+    if (!dateValue) return '';
+    const dateObj =
+      typeof dateValue === 'number' ? new Date(dateValue) : parseISO(dateValue);
+    if (isNaN(dateObj.getTime())) return String(dateValue);
+    return formatDateInUserTimezone(dateObj, 'MMM dd');
   };
 
   // Helper function to prepare chart data with optional incomplete day exclusion
@@ -85,7 +92,7 @@ const NutritionChartsGrid = ({
       }) as NutritionData[];
     }
 
-    return result;
+    return prepareTimeChartData(result, 'date');
   };
 
   // Helper function to get smart Y-axis domain for nutrition metrics
@@ -235,14 +242,18 @@ const NutritionChartsGrid = ({
                       <LineChart data={chartData} syncId="nutrition-charts">
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
-                          dataKey="date"
+                          {...getTimeXAxisProps({
+                            chartScaleMode,
+                            dateKey: 'date',
+                            timestampKey: 'timestamp',
+                            tickFormatter: formatDateForChart,
+                          })}
                           fontSize={10}
-                          tickFormatter={formatDateForChart} // Apply formatter
                           tickCount={
                             isMaximized
                               ? Math.max(chartData.length, 10)
                               : undefined
-                          } // More ticks when maximized
+                          }
                         />
                         <YAxis
                           fontSize={10}
@@ -262,7 +273,7 @@ const NutritionChartsGrid = ({
                         />
                         <Tooltip
                           labelFormatter={(value) =>
-                            formatDateForChart(value as string)
+                            formatDateForChart(value as string | number)
                           } // Apply formatter
                           formatter={(
                             value:

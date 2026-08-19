@@ -23,6 +23,8 @@ import {
   calculateSmartYAxisDomain,
   ChartDataPoint,
   getChartConfig,
+  prepareTimeChartData,
+  getTimeXAxisProps,
 } from '@/utils/chartUtils';
 import { CheckInMeasurementsResponse } from '@workspace/shared';
 import type { Widget } from '@/components/widgets/WidgetGrid';
@@ -117,10 +119,11 @@ export function useMeasurementChartWidgets({
     measurementUnit,
     convertWeight,
     convertMeasurement,
+    chartScaleMode,
   } = usePreferences();
 
   const chartData = React.useMemo(() => {
-    return measurementData.map((d) => ({
+    const rawData = measurementData.map((d) => ({
       ...d,
       date: d.entry_date,
       rawWeight: d.weight,
@@ -166,6 +169,7 @@ export function useMeasurementChartWidgets({
       rawBodyFat: d.body_fat_percentage,
       body_fat_percentage: d.body_fat_percentage || 0,
     }));
+    return prepareTimeChartData(rawData, 'date');
   }, [
     measurementData,
     weightUnit,
@@ -177,18 +181,18 @@ export function useMeasurementChartWidgets({
   info(loggingLevel, 'MeasurementChartsGrid: Rendering component.');
 
   const formatDateForChart = React.useCallback(
-    (date: string) => {
-      if (!date || typeof date !== 'string') {
-        error(
-          loggingLevel,
-          `MeasurementChartsGrid: Invalid date string provided to formatDateForChart:`,
-          date
-        );
-        return '';
+    (dateValue: string | number) => {
+      if (!dateValue) return '';
+      let dateObj: Date;
+      if (typeof dateValue === 'number') {
+        dateObj = new Date(dateValue);
+      } else {
+        dateObj = parseISO(dateValue);
       }
-      return formatDateInUserTimezone(parseISO(date), 'MMM dd');
+      if (isNaN(dateObj.getTime())) return String(dateValue);
+      return formatDateInUserTimezone(dateObj, 'MMM dd');
     },
-    [loggingLevel, formatDateInUserTimezone]
+    [formatDateInUserTimezone]
   );
 
   const getYAxisDomain = React.useCallback(
@@ -378,9 +382,13 @@ export function useMeasurementChartWidgets({
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
-                        dataKey="date"
+                        {...getTimeXAxisProps({
+                          chartScaleMode,
+                          dateKey: 'date',
+                          timestampKey: 'timestamp',
+                          tickFormatter: formatDateForChart,
+                        })}
                         fontSize={10}
-                        tickFormatter={formatDateForChart}
                         tickCount={
                           isMaximized
                             ? Math.max(chartData.length, 10)
@@ -475,8 +483,12 @@ export function useMeasurementChartWidgets({
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
-                        dataKey="date"
-                        tickFormatter={formatDateForChart}
+                        {...getTimeXAxisProps({
+                          chartScaleMode,
+                          dateKey: 'date',
+                          timestampKey: 'timestamp',
+                          tickFormatter: formatDateForChart,
+                        })}
                         tickCount={
                           isMaximized
                             ? Math.max(chartData.length, 10)

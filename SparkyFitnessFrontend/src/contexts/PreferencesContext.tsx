@@ -50,22 +50,15 @@ import { todayInZone } from '@workspace/shared';
 
 export type EnergyUnit = 'kcal' | 'kJ';
 export type ActivityLevel =
-  | 'none'
-  | 'not_much'
-  | 'light'
-  | 'moderate'
-  | 'heavy';
+  'none' | 'not_much' | 'light' | 'moderate' | 'heavy';
 export type WeightUnit = 'kg' | 'lbs' | 'st_lbs';
 export type MeasurementUnit = 'cm' | 'inches' | 'ft_in';
 export type DistanceUnit = 'km' | 'miles';
 export type LoggingLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'SILENT';
 export type calorieGoalAdjustmentMode =
-  | 'dynamic'
-  | 'fixed'
-  | 'percentage'
-  | 'tdee'
-  | 'adaptive';
+  'dynamic' | 'fixed' | 'percentage' | 'tdee' | 'adaptive';
 export type WaterDisplayUnit = 'ml' | 'oz' | 'liter';
+export type ChartScaleMode = 'time' | 'point';
 
 // Conversion constant
 const KCAL_TO_KJ = 4.184;
@@ -116,6 +109,8 @@ interface PreferencesContextType {
   goalMode: GoalMode;
   goalModeCalculationMethod: GoalModeCalculationMethod;
   goalModeCustomPercentage: number;
+  chartScaleMode: ChartScaleMode;
+  setChartScaleMode: (mode: ChartScaleMode) => void;
   setMeasurementDecimalPlaces: (places: number) => void;
   setGoalMode: (mode: GoalMode) => void;
   setGoalModeCalculationMethod: (method: GoalModeCalculationMethod) => void;
@@ -338,6 +333,17 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<GoalModeCalculationMethod>('manual');
   const [goalModeCustomPercentage, setGoalModeCustomPercentageState] =
     useState<number>(0);
+  const [chartScaleMode, setChartScaleModeState] = useState<ChartScaleMode>(
+    () => {
+      const saved = localStorage.getItem('chartScaleMode');
+      return saved === 'point' || saved === 'time' ? saved : 'time';
+    }
+  );
+
+  const setChartScaleMode = useCallback((mode: ChartScaleMode) => {
+    setChartScaleModeState(mode);
+    localStorage.setItem('chartScaleMode', mode);
+  }, []);
 
   const fetchUserPreferences = useCallback(async () => {
     try {
@@ -1117,8 +1123,7 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({
           'measurementUnit'
         ) as MeasurementUnit;
         const savedDistanceUnit = localStorage.getItem('distanceUnit') as
-          | 'km'
-          | 'miles';
+          'km' | 'miles';
         const savedDateFormat = localStorage.getItem('dateFormat');
         const savedTimeFormat = localStorage.getItem('timeFormat');
         const savedLanguage = localStorage.getItem('language');
@@ -1251,6 +1256,8 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({
       parseDateInUserTimezone,
       loadPreferences,
       saveAllPreferences,
+      chartScaleMode,
+      setChartScaleMode,
     }),
     [
       weightUnit,
@@ -1328,6 +1335,8 @@ export const PreferencesProvider: React.FC<{ children: React.ReactNode }> = ({
       parseDateInUserTimezone,
       loadPreferences,
       saveAllPreferences,
+      chartScaleMode,
+      setChartScaleMode,
     ]
   );
 

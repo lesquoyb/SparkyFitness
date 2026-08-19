@@ -13,6 +13,8 @@ import {
 } from 'recharts';
 import ZoomableChart from '@/components/ZoomableChart';
 import { formatWeight } from '@/utils/numberFormatting';
+import { usePreferences } from '@/contexts/PreferencesContext';
+import { prepareTimeChartData, getTimeXAxisProps } from '@/utils/chartUtils';
 
 interface VolumeTrendChartProps {
   data: { date: string; volume: number; comparisonVolume: number }[];
@@ -26,6 +28,9 @@ export const VolumeTrendChart = ({
   comparisonPeriod,
 }: VolumeTrendChartProps) => {
   const { t } = useTranslation();
+  const { chartScaleMode, formatDateInUserTimezone } = usePreferences();
+
+  const preparedData = prepareTimeChartData(data, 'date');
 
   return (
     <Card>
@@ -47,11 +52,21 @@ export const VolumeTrendChart = ({
               debounce={100}
             >
               <BarChart
-                data={data}
+                data={preparedData}
                 margin={{ top: 20, right: 30, bottom: 20, left: 20 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
+                <XAxis
+                  {...getTimeXAxisProps({
+                    chartScaleMode,
+                    dateKey: 'date',
+                    timestampKey: 'timestamp',
+                    tickFormatter: (d) =>
+                      typeof d === 'number'
+                        ? formatDateInUserTimezone(new Date(d), 'MMM dd')
+                        : String(d),
+                  })}
+                />
                 <YAxis
                   tickFormatter={(value) => formatWeight(value, weightUnit)}
                   label={{

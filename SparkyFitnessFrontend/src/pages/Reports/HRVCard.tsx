@@ -12,9 +12,8 @@ import {
   ReferenceArea,
 } from 'recharts';
 import { Activity } from 'lucide-react';
-import { usePreferences } from '@/contexts/PreferencesContext';
-import { parseISO } from 'date-fns';
 import { calculateBaseline, getHRVStatus } from '@/utils/reportUtil';
+import { prepareTimeChartData, getTimeXAxisProps } from '@/utils/chartUtils';
 
 interface HRVDataPoint {
   date: string;
@@ -37,7 +36,7 @@ interface TransformedData {
 
 const HRVCard = ({ data }: HRVCardProps) => {
   const { t } = useTranslation();
-  const { formatDateInUserTimezone } = usePreferences();
+  const { formatDateInUserTimezone, chartScaleMode } = usePreferences();
   const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -62,11 +61,14 @@ const HRVCard = ({ data }: HRVCardProps) => {
     const hrvValues = validData.map((d) => d.avg_overnight_hrv!);
     const baseline = calculateBaseline(hrvValues);
 
-    const transformed: TransformedData[] = validData.map((entry) => ({
-      date: entry.date,
-      displayDate: formatDateInUserTimezone(parseISO(entry.date), 'MMM dd'),
-      hrv: entry.avg_overnight_hrv!,
-    }));
+    const transformed = prepareTimeChartData(
+      validData.map((entry) => ({
+        date: entry.date,
+        displayDate: formatDateInUserTimezone(parseISO(entry.date), 'MMM dd'),
+        hrv: entry.avg_overnight_hrv!,
+      })),
+      'date'
+    );
 
     const latestHRV = transformed[transformed.length - 1]?.hrv ?? null;
 
@@ -172,7 +174,15 @@ const HRVCard = ({ data }: HRVCardProps) => {
                 stroke="hsl(var(--border))"
               />
               <XAxis
-                dataKey="displayDate"
+                {...getTimeXAxisProps({
+                  chartScaleMode,
+                  dateKey: 'displayDate',
+                  timestampKey: 'timestamp',
+                  tickFormatter: (val) =>
+                    typeof val === 'number'
+                      ? formatDateInUserTimezone(new Date(val), 'MMM dd')
+                      : String(val),
+                })}
                 fontSize={10}
                 tickLine={false}
                 stroke="hsl(var(--muted-foreground))"
@@ -195,10 +205,7 @@ const HRVCard = ({ data }: HRVCardProps) => {
                 }}
                 formatter={(
                   value:
-                    | string
-                    | number
-                    | ReadonlyArray<string | number>
-                    | undefined
+                    string | number | ReadonlyArray<string | number> | undefined
                 ) => [
                   `${Number(Array.isArray(value) ? value[0] : value).toFixed(0)} ms`,
                 ]}
