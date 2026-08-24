@@ -47,7 +47,11 @@ import SleepStageChart from './SleepStageChart';
 import SleepSummaryCard from './SleepSummaryCard';
 import SpO2Card from './SpO2Card';
 import { useSleepDebtQuery } from '@/hooks/SleepScience/useSleepScience';
-import { prepareTimeChartData, getTimeXAxisProps } from '@/utils/chartUtils';
+import {
+  prepareTimeChartData,
+  getTimeXAxisProps,
+  getTimeSyncMethod,
+} from '@/utils/chartUtils';
 
 interface SpO2DataPoint {
   date: string;
@@ -374,7 +378,12 @@ const SleepAnalyticsCharts = ({
                       minHeight={0}
                       debounce={100}
                     >
-                      <BarChart data={chartData} stackOffset="expand">
+                      <BarChart
+                        data={chartData}
+                        stackOffset="expand"
+                        syncId="nutrition-charts"
+                        syncMethod={getTimeSyncMethod(chartData)}
+                      >
                         <CartesianGrid
                           strokeDasharray="3 3"
                           stroke={gridColor}
@@ -467,7 +476,11 @@ const SleepAnalyticsCharts = ({
                       minHeight={0}
                       debounce={100}
                     >
-                      <LineChart data={chartData}>
+                      <LineChart
+                        data={chartData}
+                        syncId="nutrition-charts"
+                        syncMethod={getTimeSyncMethod(chartData)}
+                      >
                         <CartesianGrid
                           strokeDasharray="3 3"
                           stroke={gridColor}
@@ -585,7 +598,11 @@ const SleepAnalyticsCharts = ({
                       minHeight={0}
                       debounce={100}
                     >
-                      <LineChart data={chartData}>
+                      <LineChart
+                        data={chartData}
+                        syncId="nutrition-charts"
+                        syncMethod={getTimeSyncMethod(chartData)}
+                      >
                         <CartesianGrid
                           strokeDasharray="3 3"
                           stroke={gridColor}
@@ -718,7 +735,11 @@ const SleepAnalyticsCharts = ({
                       minHeight={0}
                       debounce={100}
                     >
-                      <LineChart data={chartData}>
+                      <LineChart
+                        data={chartData}
+                        syncId="nutrition-charts"
+                        syncMethod={getTimeSyncMethod(chartData)}
+                      >
                         <CartesianGrid
                           strokeDasharray="3 3"
                           stroke={gridColor}

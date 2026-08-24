@@ -23,6 +23,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import ZoomableChart from '@/components/ZoomableChart';
+import { getTimeSyncMethod } from '@/utils/chartUtils';
 import { parseISO, format } from 'date-fns';
 import { TrendingUp, BarChart3, ChevronDown } from 'lucide-react';
 import { getEnergyUnitString } from '@/utils/nutritionCalculations';
@@ -470,6 +471,7 @@ const NutritionPeriodSummary = ({
                       <LineChart
                         data={dailyChartData}
                         syncId="nutrition-charts"
+                        syncMethod={getTimeSyncMethod(dailyChartData)}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
@@ -612,7 +614,11 @@ const NutritionPeriodSummary = ({
                     minHeight={0}
                     debounce={100}
                   >
-                    <AreaChart data={cumulativeData} syncId="nutrition-charts">
+                    <AreaChart
+                      data={cumulativeData}
+                      syncId="nutrition-charts"
+                      syncMethod={getTimeSyncMethod(cumulativeData)}
+                    >
                       <defs>
                         <linearGradient
                           id="colorNutrient"

@@ -14,7 +14,7 @@ import {
 import { Battery } from 'lucide-react';
 import BodyBatteryGauge from './BodyBatteryGauge';
 import { usePreferences } from '@/contexts/PreferencesContext';
-import { parseISO } from 'date-fns';
+import { getTimeSyncMethod } from '@/utils/chartUtils';
 import { BODY_BATTERY_METRICS } from '@/constants/reports';
 import {
   CustomCategoriesResponse,
@@ -182,6 +182,7 @@ const BodyBatteryCard: React.FC<BodyBatteryCardProps> = ({
                   barGap={0}
                   barCategoryGap="20%"
                   syncId="nutrition-charts"
+                  syncMethod={getTimeSyncMethod(transformedData)}
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"

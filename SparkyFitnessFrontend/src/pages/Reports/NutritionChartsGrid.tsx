@@ -21,6 +21,7 @@ import {
   getChartConfig,
   prepareTimeChartData,
   getTimeXAxisProps,
+  getTimeSyncMethod,
 } from '@/utils/chartUtils';
 import type { UserCustomNutrient } from '@/types/customNutrient';
 import { CENTRAL_NUTRIENT_CONFIG } from '@/constants/nutrients';
@@ -239,7 +240,11 @@ const NutritionChartsGrid = ({
                       minHeight={0}
                       debounce={100}
                     >
-                      <LineChart data={chartData} syncId="nutrition-charts">
+                      <LineChart
+                        data={chartData}
+                        syncId="nutrition-charts"
+                        syncMethod={getTimeSyncMethod(chartData)}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
                           {...getTimeXAxisProps({

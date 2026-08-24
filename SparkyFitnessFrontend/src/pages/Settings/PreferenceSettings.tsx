@@ -20,6 +20,7 @@ import {
   usePreferences,
   WeightUnit,
   MeasurementUnit,
+  ChartScaleMode,
 } from '@/contexts/PreferencesContext';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,6 +44,8 @@ export const PreferenceSettings = () => {
     setDateFormat,
     timeFormat,
     setTimeFormat,
+    chartScaleMode,
+    setChartScaleMode,
     itemDisplayLimit,
     setItemDisplayLimit, // Add itemDisplayLimit and setItemDisplayLimit
     autoScaleOpenFoodFactsImports,
@@ -86,6 +89,7 @@ export const PreferenceSettings = () => {
         firstDayOfWeek,
         measurementDecimalPlaces,
         timezone,
+        chartScaleMode,
         loggingLevel: localLoggingLevel,
       });
       toast({
@@ -164,6 +168,35 @@ export const PreferenceSettings = () => {
                   {t(
                     'settings.preferences.timeFormat12Lower',
                     '12-hour am/pm (2:30 pm)'
+                  )}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="chart_scale_mode">
+              {t('settings.preferences.chartScaleMode', 'Chart Scale Mode')}
+            </Label>
+            <Select
+              value={chartScaleMode}
+              onValueChange={(value) =>
+                setChartScaleMode(value as ChartScaleMode)
+              }
+            >
+              <SelectTrigger id="chart_scale_mode">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="time">
+                  {t(
+                    'settings.preferences.chartScaleTime',
+                    'Time Proportional (Scale over time)'
+                  )}
+                </SelectItem>
+                <SelectItem value="point">
+                  {t(
+                    'settings.preferences.chartScalePoint',
+                    'Data Points (Equidistant points)'
                   )}
                 </SelectItem>
               </SelectContent>

@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { Wind } from 'lucide-react';
 import { usePreferences } from '@/contexts/PreferencesContext';
+import { getTimeSyncMethod } from '@/utils/chartUtils';
 import { parseISO } from 'date-fns';
 import {
   CustomCategoriesResponse,
@@ -298,7 +299,11 @@ const RespirationCard: React.FC<RespirationCardProps> = ({
                 minHeight={0}
                 debounce={100}
               >
-                <LineChart data={transformedData} syncId="nutrition-charts">
+                <LineChart
+                  data={transformedData}
+                  syncId="nutrition-charts"
+                  syncMethod={getTimeSyncMethod(transformedData)}
+                >
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}

@@ -9,10 +9,7 @@ import {
   Activity,
   Table as TableIcon,
   Pill,
-  Clock,
-  ListFilter,
 } from 'lucide-react';
-import { usePreferences } from '@/contexts/PreferencesContext';
 
 interface ReportsControlsProps {
   startDate: string;
@@ -32,7 +29,6 @@ const ReportsControls = ({
   onTabChange,
 }: ReportsControlsProps) => {
   const { t } = useTranslation();
-  const { chartScaleMode, setChartScaleMode } = usePreferences();
 
   const reportTypes = [
     {
@@ -106,45 +102,8 @@ const ReportsControls = ({
       {/* Vertical Divider (Desktop Only) */}
       <div className="hidden lg:block w-px h-6 bg-border" />
 
-      {/* Secondary Controls: Chart Scale Mode & Date Picker */}
+      {/* Secondary Controls: Date Picker */}
       <div className="flex flex-wrap items-center gap-3 shrink-0">
-        <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border">
-          <Button
-            variant={chartScaleMode === 'time' ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={() => setChartScaleMode('time')}
-            title={t(
-              'reports.scaleOverTime',
-              'Scale over time (proportional dates)'
-            )}
-            className={`rounded-full px-3 h-8 text-xs font-medium gap-1.5 ${
-              chartScaleMode === 'time'
-                ? 'bg-background shadow-xs text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5" />
-            <span>{t('reports.timeScale', 'Time')}</span>
-          </Button>
-          <Button
-            variant={chartScaleMode === 'point' ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={() => setChartScaleMode('point')}
-            title={t(
-              'reports.scaleOverPoints',
-              'Scale over data points (equal width)'
-            )}
-            className={`rounded-full px-3 h-8 text-xs font-medium gap-1.5 ${
-              chartScaleMode === 'point'
-                ? 'bg-background shadow-xs text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <ListFilter className="w-3.5 h-3.5" />
-            <span>{t('reports.pointScale', 'Points')}</span>
-          </Button>
-        </div>
-
         <DateRangePickerWithPresets
           startDate={startDate}
           endDate={endDate}

@@ -25,6 +25,7 @@ import {
   getChartConfig,
   prepareTimeChartData,
   getTimeXAxisProps,
+  getTimeSyncMethod,
 } from '@/utils/chartUtils';
 import { CheckInMeasurementsResponse } from '@workspace/shared';
 import type { Widget } from '@/components/widgets/WidgetGrid';
@@ -376,6 +377,11 @@ export function useMeasurementChartWidgets({
                   >
                     <LineChart
                       syncId="nutrition-charts"
+                      syncMethod={getTimeSyncMethod(
+                        chartData.filter(
+                          (d) => d[metric.dataKey as keyof typeof d]
+                        )
+                      )}
                       data={chartData.filter(
                         (d) => d[metric.dataKey as keyof typeof d]
                       )}
@@ -480,6 +486,11 @@ export function useMeasurementChartWidgets({
                         (d) => d.steps !== undefined && d.steps !== null
                       )}
                       syncId="nutrition-charts"
+                      syncMethod={getTimeSyncMethod(
+                        chartData.filter(
+                          (d) => d.steps !== undefined && d.steps !== null
+                        )
+                      )}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis

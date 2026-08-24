@@ -257,3 +257,85 @@ export function getTimeXAxisProps(options: TimeXAxisPropsOptions) {
     tickFormatter,
   };
 }
+
+/**
+ * Parses a date or timestamp value into a numeric timestamp in milliseconds.
+ */
+export function parseDateToTimestamp(rawDate: any): number {
+  if (typeof rawDate === 'number') return rawDate;
+  if (typeof rawDate === 'string' && rawDate) {
+    const parsed = new Date(
+      rawDate.includes('T') ? rawDate : `${rawDate}T00:00:00`
+    );
+    const ts = isNaN(parsed.getTime())
+      ? new Date(rawDate).getTime()
+      : parsed.getTime();
+    return isNaN(ts) ? 0 : ts;
+  }
+  if (rawDate instanceof Date) {
+    const ts = rawDate.getTime();
+    return isNaN(ts) ? 0 : ts;
+  }
+  return 0;
+}
+
+export interface TimeSyncOptions {
+  dateKey?: string;
+  timestampKey?: string;
+}
+
+/**
+ * Creates a custom Recharts syncMethod function for synchronized charts (syncId).
+ * Signature in Recharts 3.x: (ticks: TooltipAxisTick[], param: SyncMethodParam) => index
+ * Matches hovered points by closest date/timestamp across time-based and point-based charts,
+ * falling back to standard index matching for non-time charts.
+ */
+export function getTimeSyncMethod<T extends Record<string, any>>(
+  _data?: T[],
+  _options?: TimeSyncOptions
+) {
+  return (ticks: any[], param: any): number => {
+    if (!ticks || !Array.isArray(ticks) || ticks.length === 0) return 0;
+    if (!param) return 0;
+
+    let targetTimestamp: number | null = null;
+
+    // Extract target date/timestamp from param.activeLabel
+    if (typeof param.activeLabel === 'number' && param.activeLabel > 0) {
+      targetTimestamp = param.activeLabel;
+    } else if (typeof param.activeLabel === 'string' && param.activeLabel) {
+      const parsed = parseDateToTimestamp(param.activeLabel);
+      if (parsed > 0) targetTimestamp = parsed;
+    }
+
+    if (targetTimestamp != null && targetTimestamp > 0) {
+      let closestIndex = 0;
+      let minDiff = Infinity;
+
+      for (let i = 0; i < ticks.length; i++) {
+        const tick = ticks[i];
+        let tickTs = 0;
+
+        if (typeof tick?.value === 'number') {
+          tickTs = tick.value;
+        } else if (tick?.value != null) {
+          tickTs = parseDateToTimestamp(tick.value);
+        }
+
+        if (tickTs > 0) {
+          const diff = Math.abs(tickTs - targetTimestamp);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIndex = i;
+          }
+        }
+      }
+
+      return closestIndex;
+    }
+
+    // Fallback: use activeTooltipIndex or activeIndex if present
+    const fallback = param.activeTooltipIndex ?? param.activeIndex ?? 0;
+    return Math.min(Math.max(0, Number(fallback) || 0), ticks.length - 1);
+  };
+}

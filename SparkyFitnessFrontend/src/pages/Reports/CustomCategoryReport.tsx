@@ -11,11 +11,15 @@ import {
 import { Activity } from 'lucide-react';
 import ZoomableChart from '@/components/ZoomableChart';
 import { useTranslation } from 'react-i18next';
-import { BODY_BATTERY_METRICS } from './BodyBatteryCard';
+import { BODY_BATTERY_METRICS } from '@/constants/reports';
 import { RESPIRATION_METRICS } from './RespirationCard';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { formatCustomChartData } from '@/utils/reportUtil';
-import { calculateSmartYAxisDomain, getChartConfig } from '@/utils/chartUtils';
+import {
+  calculateSmartYAxisDomain,
+  getChartConfig,
+  getTimeSyncMethod,
+} from '@/utils/chartUtils';
 import {
   CustomCategoriesResponse,
   CustomMeasurementsResponse,
@@ -110,7 +114,11 @@ export const CustomCategoryReport = ({
                         minHeight={0}
                         debounce={100}
                       >
-                        <LineChart data={chartData} syncId="nutrition-charts">
+                        <LineChart
+                          data={chartData}
+                          syncId="nutrition-charts"
+                          syncMethod={getTimeSyncMethod(chartData)}
+                        >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="date" />
                           <YAxis
