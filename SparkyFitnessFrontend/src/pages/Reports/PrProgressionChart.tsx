@@ -55,7 +55,10 @@ export const PrProgressionChart = ({
       <CardContent>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={sortedData}>
+            <LineChart
+              key={`pr-progression-${chartScaleMode}`}
+              data={sortedData}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 {...getTimeXAxisProps({

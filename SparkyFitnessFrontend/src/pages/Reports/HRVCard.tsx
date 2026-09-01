@@ -167,7 +167,7 @@ const HRVCard = ({ data }: HRVCardProps) => {
             minHeight={0}
             debounce={100}
           >
-            <ComposedChart data={transformedData}>
+            <ComposedChart key={`hrv-${chartScaleMode}`} data={transformedData}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
@@ -205,7 +205,10 @@ const HRVCard = ({ data }: HRVCardProps) => {
                 }}
                 formatter={(
                   value:
-                    string | number | ReadonlyArray<string | number> | undefined
+                    | string
+                    | number
+                    | ReadonlyArray<string | number>
+                    | undefined
                 ) => [
                   `${Number(Array.isArray(value) ? value[0] : value).toFixed(0)} ms`,
                 ]}

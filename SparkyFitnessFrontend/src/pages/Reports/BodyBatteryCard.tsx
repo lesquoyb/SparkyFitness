@@ -42,7 +42,7 @@ const BodyBatteryCard: React.FC<BodyBatteryCardProps> = ({
   measurementsData,
 }) => {
   const { t } = useTranslation();
-  const { formatDateInUserTimezone } = usePreferences();
+  const { chartScaleMode, formatDateInUserTimezone } = usePreferences();
   const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -178,6 +178,7 @@ const BodyBatteryCard: React.FC<BodyBatteryCardProps> = ({
                 debounce={100}
               >
                 <BarChart
+                  key={`body-battery-${chartScaleMode}`}
                   data={transformedData}
                   barGap={0}
                   barCategoryGap="20%"

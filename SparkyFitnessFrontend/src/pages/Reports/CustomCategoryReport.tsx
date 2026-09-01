@@ -47,6 +47,7 @@ export const CustomCategoryReport = ({
   const {
     measurementUnit: defaultMeasurementUnit,
     convertMeasurement,
+    chartScaleMode,
     loggingLevel,
   } = usePreferences();
 
@@ -115,6 +116,7 @@ export const CustomCategoryReport = ({
                         debounce={100}
                       >
                         <LineChart
+                          key={`custom-cat-${category.id}-${chartScaleMode}`}
                           data={chartData}
                           syncId="nutrition-charts"
                           syncMethod={getTimeSyncMethod(chartData)}

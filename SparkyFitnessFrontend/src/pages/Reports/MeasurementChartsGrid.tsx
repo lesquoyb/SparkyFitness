@@ -376,6 +376,7 @@ export function useMeasurementChartWidgets({
                     debounce={100}
                   >
                     <LineChart
+                      key={`${metric.dataKey}-${chartScaleMode}`}
                       syncId="nutrition-charts"
                       syncMethod={getTimeSyncMethod(
                         chartData.filter(
@@ -482,6 +483,7 @@ export function useMeasurementChartWidgets({
                     debounce={100}
                   >
                     <BarChart
+                      key={`steps-${chartScaleMode}`}
                       data={chartData.filter(
                         (d) => d.steps !== undefined && d.steps !== null
                       )}

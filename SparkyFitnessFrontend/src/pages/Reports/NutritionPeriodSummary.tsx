@@ -62,6 +62,7 @@ const NutritionPeriodSummary = ({
     showNetCarbs,
     calorieGoalAdjustmentMode,
     exerciseCaloriePercentage,
+    chartScaleMode,
   } = usePreferences();
   const effectiveNutritionData = useMemo(
     () => withNetCarbsSubstitution(nutritionData, showNetCarbs),
@@ -469,6 +470,7 @@ const NutritionPeriodSummary = ({
                       debounce={100}
                     >
                       <LineChart
+                        key={`daily-summary-${chartScaleMode}`}
                         data={dailyChartData}
                         syncId="nutrition-charts"
                         syncMethod={getTimeSyncMethod(dailyChartData)}
@@ -615,6 +617,7 @@ const NutritionPeriodSummary = ({
                     debounce={100}
                   >
                     <AreaChart
+                      key={`cumulative-summary-${chartScaleMode}`}
                       data={cumulativeData}
                       syncId="nutrition-charts"
                       syncMethod={getTimeSyncMethod(cumulativeData)}

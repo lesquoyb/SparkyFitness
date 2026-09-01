@@ -241,6 +241,7 @@ const NutritionChartsGrid = ({
                       debounce={100}
                     >
                       <LineChart
+                        key={`${nutrientKey}-${chartScaleMode}`}
                         data={chartData}
                         syncId="nutrition-charts"
                         syncMethod={getTimeSyncMethod(chartData)}

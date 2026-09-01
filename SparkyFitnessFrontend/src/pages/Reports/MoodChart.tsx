@@ -140,6 +140,7 @@ const MoodChart = ({ data, title }: MoodChartProps) => {
               debounce={100}
             >
               <ScatterChart
+                key={`mood-${chartScaleMode}`}
                 margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
               >
                 <CartesianGrid />

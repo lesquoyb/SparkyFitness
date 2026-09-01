@@ -70,7 +70,7 @@ const RespirationCard: React.FC<RespirationCardProps> = ({
   measurementsData,
 }) => {
   const { t } = useTranslation();
-  const { formatDateInUserTimezone } = usePreferences();
+  const { chartScaleMode, formatDateInUserTimezone } = usePreferences();
   const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -300,6 +300,7 @@ const RespirationCard: React.FC<RespirationCardProps> = ({
                 debounce={100}
               >
                 <LineChart
+                  key={`respiration-${chartScaleMode}`}
                   data={transformedData}
                   syncId="nutrition-charts"
                   syncMethod={getTimeSyncMethod(transformedData)}

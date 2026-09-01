@@ -264,7 +264,10 @@ export const FastingReport = ({ fastingData }: FastingReportProps) => {
                       minHeight={0}
                       debounce={100}
                     >
-                      <BarChart data={dailyData}>
+                      <BarChart
+                        key={`fasting-bar-${chartScaleMode}`}
+                        data={dailyData}
+                      >
                         <XAxis
                           {...getTimeXAxisProps({
                             chartScaleMode,
@@ -499,7 +502,10 @@ export const FastingReport = ({ fastingData }: FastingReportProps) => {
                       minHeight={0}
                       debounce={100}
                     >
-                      <LineChart data={trendData}>
+                      <LineChart
+                        key={`fasting-line-${chartScaleMode}`}
+                        data={trendData}
+                      >
                         <XAxis
                           {...getTimeXAxisProps({
                             chartScaleMode,

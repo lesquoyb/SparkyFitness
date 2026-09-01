@@ -379,6 +379,7 @@ const SleepAnalyticsCharts = ({
                       debounce={100}
                     >
                       <BarChart
+                        key={`sleep-stages-${chartScaleMode}`}
                         data={chartData}
                         stackOffset="expand"
                         syncId="nutrition-charts"
@@ -477,6 +478,7 @@ const SleepAnalyticsCharts = ({
                       debounce={100}
                     >
                       <LineChart
+                        key={`sleep-consistency-${chartScaleMode}`}
                         data={chartData}
                         syncId="nutrition-charts"
                         syncMethod={getTimeSyncMethod(chartData)}
@@ -599,6 +601,7 @@ const SleepAnalyticsCharts = ({
                       debounce={100}
                     >
                       <LineChart
+                        key={`sleep-debt-${chartScaleMode}`}
                         data={chartData}
                         syncId="nutrition-charts"
                         syncMethod={getTimeSyncMethod(chartData)}
@@ -736,6 +739,7 @@ const SleepAnalyticsCharts = ({
                       debounce={100}
                     >
                       <LineChart
+                        key={`sleep-efficiency-${chartScaleMode}`}
                         data={chartData}
                         syncId="nutrition-charts"
                         syncMethod={getTimeSyncMethod(chartData)}
