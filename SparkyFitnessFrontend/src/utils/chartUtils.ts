@@ -263,12 +263,18 @@ export function getTimeXAxisProps(options: TimeXAxisPropsOptions) {
  */
 export function parseDateToTimestamp(rawDate: any): number {
   if (typeof rawDate === 'number') return rawDate;
-  if (typeof rawDate === 'string' && rawDate) {
+  if (typeof rawDate === 'string' && rawDate.trim()) {
+    const trimmed = rawDate.trim();
+    // Handle stringified epoch timestamps (e.g. "1767225600000")
+    if (/^\d+$/.test(trimmed)) {
+      const num = Number(trimmed);
+      if (!isNaN(num) && num > 0) return num;
+    }
     const parsed = new Date(
-      rawDate.includes('T') ? rawDate : `${rawDate}T00:00:00`
+      trimmed.includes('T') ? trimmed : `${trimmed}T00:00:00`
     );
     const ts = isNaN(parsed.getTime())
-      ? new Date(rawDate).getTime()
+      ? new Date(trimmed).getTime()
       : parsed.getTime();
     return isNaN(ts) ? 0 : ts;
   }
@@ -301,24 +307,21 @@ export function getTimeSyncMethod<T extends Record<string, any>>(
     let targetTimestamp: number | null = null;
 
     // Extract target date/timestamp from param.activeLabel
-    if (typeof param.activeLabel === 'number' && param.activeLabel > 0) {
-      targetTimestamp = param.activeLabel;
-    } else if (typeof param.activeLabel === 'string' && param.activeLabel) {
+    if (param.activeLabel != null && param.activeLabel !== '') {
       const parsed = parseDateToTimestamp(param.activeLabel);
       if (parsed > 0) targetTimestamp = parsed;
     }
 
     if (targetTimestamp != null && targetTimestamp > 0) {
-      let closestIndex = 0;
+      let closestIndex = -1;
       let minDiff = Infinity;
 
       for (let i = 0; i < ticks.length; i++) {
         const tick = ticks[i];
-        let tickTs = 0;
+        if (tick == null) continue;
 
-        if (typeof tick?.value === 'number') {
-          tickTs = tick.value;
-        } else if (tick?.value != null) {
+        let tickTs = 0;
+        if (tick.value != null && tick.value !== '') {
           tickTs = parseDateToTimestamp(tick.value);
         }
 
@@ -331,7 +334,9 @@ export function getTimeSyncMethod<T extends Record<string, any>>(
         }
       }
 
-      return closestIndex;
+      if (closestIndex >= 0) {
+        return closestIndex;
+      }
     }
 
     // Fallback: use activeTooltipIndex or activeIndex if present
